@@ -6,9 +6,16 @@ if (-not (Test-Path $profileDir)) {
     New-Item -Path $profileDir -ItemType Directory -Force
 }
 
-# Copy the profile
-Copy-Item -Path "Microsoft.PowerShell_profile.ps1" -Destination $PROFILE -Force
-Write-Host "✓ PowerShell profile installed" -ForegroundColor Green
+# Create a loader that points to this repository
+$scriptPath = $MyInvocation.MyCommand.Path
+$repoDir = Split-Path $scriptPath -Parent
+
+@"
+# This profile automatically loads from the Git repository
+. "$repoDir\Microsoft.PowerShell_profile.ps1"
+"@ | Set-Content -Path $PROFILE
+
+Write-Host "✓ PowerShell profile loader installed" -ForegroundColor Green
 
 # Install custom Oh-My-Posh theme if present
 if (Test-Path "modern-powershell.omp.json") {
@@ -37,5 +44,4 @@ if (-not (Get-Command oh-my-posh -ErrorAction SilentlyContinue)) {
     Write-Host "✓ Oh-My-Posh installed" -ForegroundColor Green
 }
 
-Write-Host "
-Setup complete! Restart PowerShell to apply changes." -ForegroundColor Green
+Write-Host "`nSetup complete! Restart PowerShell to apply changes." -ForegroundColor Green
